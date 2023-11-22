@@ -36,9 +36,17 @@ export default {
   padding: 15px;
   margin: 10px;
   border-radius: 8px;
-  width: 45%; /* Adjust as needed */
+  width: calc(50% - 20px); /* 2 columns with spacing between them */
+  box-sizing: border-box;
   transition: background-color 0.3s ease;
 }
+
+@media screen and (max-width: 600px) {
+  .repo-card {
+    width: 100%; /* Full width for small screens */
+  }
+}
+
 p {
   color: #ecf0f1;
 }
