@@ -1,10 +1,20 @@
 <!-- src/components/Repositories.vue -->
 <template>
   <div>
-    <h2>{{ repositories.length }} Repositories</h2>
-    <div v-if="repositories.length === 0">No repositories found.</div>
+    <h2>{{ filteredRepositories.length }} Repositories</h2>
+    
+    <div class="search-container">
+      <input 
+        type="text" 
+        v-model="searchTerm" 
+        placeholder="Search repositories..." 
+        class="search-input"
+      />
+    </div>
+    
+    <div v-if="filteredRepositories.length === 0">No repositories found.</div>
     <div v-else class="repo-container">
-      <div v-for="repo in repositories" :key="repo.id" class="repo-card">
+      <div v-for="repo in filteredRepositories" :key="repo.id" class="repo-card">
         <h3>{{ repo.name }}</h3>
         <p>{{ repo.description }}</p>
         <a :href="repo.html_url" target="_blank" rel="noopener noreferrer"
@@ -20,6 +30,35 @@ export default {
   props: {
     repositories: Array,
   },
+  data() {
+    return {
+      searchTerm: '',
+    };
+  },
+  computed: {
+    filteredRepositories() {
+      if (!this.searchTerm.trim()) {
+        return this.repositories;
+      }
+      
+      const term = this.searchTerm.toLowerCase();
+      return this.repositories.filter(repo => 
+        repo.name.toLowerCase().includes(term) || 
+        (repo.description && repo.description.toLowerCase().includes(term))
+      );
+    }
+  },
+  methods: {
+    async getRepositories() {
+      try {
+        const response = await githubAPI.get('/repos?per_page=100&sort=updated');
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching repositories:', error);
+        return [];
+      }
+    }
+  }
 };
 </script>
 
@@ -66,5 +105,26 @@ p {
 .repo-card a {
   color: #3498db;
   text-decoration: none;
+}
+
+.search-container {
+  margin: 20px auto;
+  max-width: 500px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  background-color: #2c3e50;
+  color: #ecf0f1;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #42b983;
+  box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.25);
 }
 </style>
